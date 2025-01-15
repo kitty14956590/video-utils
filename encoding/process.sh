@@ -25,19 +25,21 @@ ROOT=$(cd "${0%/*}" && echo $PWD)
 ENCODING="$($ROOT/identify.sh $FILE)"
 H264_ENCODER="$($ROOT/encoder.sh h264)"
 H265_ENCODER="$($ROOT/encoder.sh hevc)"
+TRANSCODE="$ROOT/transcode.sh"
 if [ "$ENCODING" == "hevc" ]; then
 	mv "$FILE" "${STRIPPED}_h265.mp4"
-	ffmpeg -y -hwaccel auto -i "${STRIPPED}_h265.mp4" -c:v "$H264_ENCODER" -c:a aac "${STRIPPED}_h264.mp4" &>/dev/null
-	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}';
+	$TRANSCODE h264 "${STRIPPED}_h265.mp4" "${STRIPPED}_h264.mp4" &>/dev/null
+	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}'
 	exit 0
 fi
 if [ "$ENCODING" == "h264" ]; then
 	mv "$FILE" "${STRIPPED}_h264.mp4"
-	ffmpeg -y -hwaccel auto -i "${STRIPPED}_h264.mp4" -c:v "$H265_ENCODER" "${STRIPPED}_h265.mp4" &>/dev/null
-	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}';
+	$TRANSCODE hevc "${STRIPPED}_h264.mp4" "${STRIPPED}_h265.mp4" &>/dev/null
+	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}'
 	exit 0
 fi
-mv "$FILE" "${STRIPPED}_${ENCODING}.mp4"
-ffmpeg -y -hwaccel auto -i "${STRIPPED}_${ENCODING}.mp4" -c:v "$H264_ENCODER" -c:a aac "${STRIPPED}_h264.mp4" &>/dev/null
-ffmpeg -y -hwaccel auto -i "${STRIPPED}_${ENCODING}.mp4" -c:v "$H265_ENCODER" "${STRIPPED}_h265.mp4" &>/dev/null
+NEWFILE="${STRIPPED}_${ENCODING}.mp4"
+mv "$FILE" "$NEWFILE"
+$TRANSCODE h264 "$NEWFILE" "${STRIPPED}_h264.mp4" &>/dev/null
+$TRANSCODE hevc "$NEWFILE" "${STRIPPED}_h265.mp4" &>/dev/null
 echo "{\"codec\":[\"${ENCODING}\",\"h264\",\"h265\"],\"chrome\":\"h265\",\"firefox\":\"h264\"}"
