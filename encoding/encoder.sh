@@ -21,7 +21,7 @@ if [ "$ENCODING" == "vp8" ]; then
 fi
 
 if [ "$ENCODING" == "vp9" ]; then
-	echo "vp9" # you may want to use vp8_vaapi for AMD gpus
+	echo "vp9" # you may want to use vp9_vaapi for AMD gpus
 	exit 0
 fi
 
