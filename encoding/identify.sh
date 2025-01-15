@@ -17,5 +17,5 @@ if [ "$FILETYPE" != "video/mp4" ]; then
 	exit 1
 fi
 
-ENCODING="$(ffprobe -v error -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 $FILE)";
+ENCODING="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 $FILE)";
 echo "$ENCODING"
