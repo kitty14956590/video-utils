@@ -1,18 +1,19 @@
 #!/bin/bash
+# non-human readable errors
 if [ "$#" != "1" ]; then
-	echo "Usage: $0 <video>"
+	echo "ERROR"
 	exit 1
 fi
 
 FILE="$1"
 if [ ! -f "$FILE" ]; then
-	echo "File $FILE does not exist."
+	echo "ERROR"
 	exit 1
 fi
 
 FILETYPE="$(file --mime-type -b $FILE)"
 if [ "$FILETYPE" != "video/mp4" ] && [ "$FILETYPE" != "video/webm" ] && [ "$FILETYPE" != "video/x-matroska" ] && [ "$FILETYPE" != "video/ogg" ] && [ "$FILETYPE" != "video/quicktime" ]; then
-	echo "$FILE is not a video."
+	echo "ERROR"
 	exit 1
 fi
 

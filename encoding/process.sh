@@ -11,30 +11,33 @@ if [ ! -f "$FILE" ]; then
 	exit 1
 fi
 
+ROOT=$(cd "${0%/*}" && echo $PWD)
 FILETYPE="$(file --mime-type -b $FILE)"
 if [ "$FILETYPE" != "video/mp4" ]; then
-	echo "$FILE is not a video."
-	exit 1
+	NEW="$($ROOT/recontainerise.sh $FILE)"
+	if [ "$NEW" == "ERROR" ]; then
+		echo "$FILE is not a video."
+		exit 1
+	fi
+	FILE="$NEW"
 fi
 
-#      we want to make a h265 video for (modern) chrome and h264 for firefox
-# we also keep the original if its neither so users can manually select it if they wish
+# transcode into h264, h265, mpeg4, vp8, vp9, mpeg1, and mpeg2
 STRIPPED=${FILE%.*}
-ROOT=$(cd "${0%/*}" && echo $PWD)
 ENCODING="$($ROOT/identify.sh $FILE)"
 TRANSCODE="$ROOT/transcode.sh"
 
 NEW_FILE="${STRIPPED}_${ENCODING}.mp4"
-CODECS=()
+CODECS=("$ENCODING")
 process() {
 	NEW_ENCODING="$1"
 	EXTENSION="$2"
-	CODECS+=( "$NEW_ENCODING" )
 	if [ "$ENCODING" == "$NEW_ENCODING" ]; then
 		return 0
 	fi
 
 	$TRANSCODE "$NEW_ENCODING" "$NEW_FILE" "${STRIPPED}_${NEW_ENCODING}.${EXTENSION}" &>/dev/null
+	CODECS+=( "$NEW_ENCODING" )
 	return 0
 }
 
