@@ -5,7 +5,7 @@ if [ "$#" != "1" ]; then
 fi
 
 ENCODING="$1"
-if [ "$ENCODING" == "hevc" ]; then
+if [ "$ENCODING" == "hevc" ] || [ "$ENCODING" == "h265" ]; then
 	echo "hevc" # you may want to use hevc_nvenc or hevc_vaapi for NVIDIA and AMD gpus respectively
 	exit 0
 fi

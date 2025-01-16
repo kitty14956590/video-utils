@@ -12,14 +12,13 @@ if [ ! -f "$INPUT" ]; then
 	exit 1
 fi
 
-IN_FILETYPE="$(file --mime-type -b $INPUT)"
-if [ "$IN_FILETYPE" != "video/mp4" ]; then
-	echo "$FILE is not a video."
+FILETYPE="$(file --mime-type -b $INPUT)"
+if [ "$FILETYPE" != "video/mp4" ] && [ "$FILETYPE" != "video/webm" ] && [ "$FILETYPE" != "video/x-matroska" ] && [ "$FILETYPE" != "video/ogg" ] && [ "$FILETYPE" != "video/quicktime" ]; then
+	echo "$INPUT is not a video."
 	exit 1
 fi
 
 ROOT=$(cd "${0%/*}" && echo $PWD)
 ENCODER="$($ROOT/encoder.sh $ENCODING)"
-
 ffmpeg -y -hwaccel auto -i "$INPUT" -c:v "$ENCODER" "$OUTPUT" &>/dev/null
 echo "Success!"

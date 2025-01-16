@@ -19,27 +19,34 @@ fi
 
 #      we want to make a h265 video for (modern) chrome and h264 for firefox
 # we also keep the original if its neither so users can manually select it if they wish
-
 STRIPPED=${FILE%.*}
 ROOT=$(cd "${0%/*}" && echo $PWD)
 ENCODING="$($ROOT/identify.sh $FILE)"
-H264_ENCODER="$($ROOT/encoder.sh h264)"
-H265_ENCODER="$($ROOT/encoder.sh hevc)"
 TRANSCODE="$ROOT/transcode.sh"
-if [ "$ENCODING" == "hevc" ]; then
-	mv "$FILE" "${STRIPPED}_h265.mp4"
-	$TRANSCODE h264 "${STRIPPED}_h265.mp4" "${STRIPPED}_h264.mp4" &>/dev/null
-	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}'
-	exit 0
-fi
-if [ "$ENCODING" == "h264" ]; then
-	mv "$FILE" "${STRIPPED}_h264.mp4"
-	$TRANSCODE hevc "${STRIPPED}_h264.mp4" "${STRIPPED}_h265.mp4" &>/dev/null
-	echo '{"codec":["h264","h265"],"chrome":"h265","firefox":"h264"}'
-	exit 0
-fi
-NEWFILE="${STRIPPED}_${ENCODING}.mp4"
-mv "$FILE" "$NEWFILE"
-$TRANSCODE h264 "$NEWFILE" "${STRIPPED}_h264.mp4" &>/dev/null
-$TRANSCODE hevc "$NEWFILE" "${STRIPPED}_h265.mp4" &>/dev/null
-echo "{\"codec\":[\"${ENCODING}\",\"h264\",\"h265\"],\"chrome\":\"h265\",\"firefox\":\"h264\"}"
+
+NEW_FILE="${STRIPPED}_${ENCODING}.mp4"
+CODECS=()
+process() {
+	NEW_ENCODING="$1"
+	EXTENSION="$2"
+	CODECS+=( "$NEW_ENCODING" )
+	if [ "$ENCODING" == "$NEW_ENCODING" ]; then
+		return 0
+	fi
+
+	$TRANSCODE "$NEW_ENCODING" "$NEW_FILE" "${STRIPPED}_${NEW_ENCODING}.${EXTENSION}" &>/dev/null
+	return 0
+}
+
+
+mv "$FILE" "$NEW_FILE"
+process h264 mp4
+process h265 mp4
+process mpeg4 mp4
+process vp8 webm
+process vp9 mp4
+process mpeg1video mp4
+process mpeg2video mp4
+
+CODECS_JSON=$(printf "%s\n" "${CODECS[@]}" | jq -R . | jq -c -s .)
+echo "{\"codec\":${CODECS_JSON},\"chrome\":\"h265\",\"firefox\":\"h264\"}"

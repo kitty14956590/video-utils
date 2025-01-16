@@ -18,4 +18,8 @@ if [ "$FILETYPE" != "video/mp4" ]; then
 fi
 
 ENCODING="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 $FILE)";
+if [ "$ENCODING" == "hevc" ]; then
+	echo "h265"
+	exit 0
+fi
 echo "$ENCODING"
