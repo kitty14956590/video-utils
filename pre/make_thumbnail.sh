@@ -12,12 +12,11 @@ if [ ! -f "$FILE" ]; then
 fi
 
 FILETYPE="$(file --mime-type -b $FILE)"
-if [ "$FILETYPE" != "video/mp4" ]; then
+if [ "$FILETYPE" != "video/*" ]; then
 	echo "$FILE is not a video."
 	exit 1
 fi
 
 rm -f $THUMB
-
 ffmpeg -i "$FILE" -vf "select=eq(n\,0)" -q:v 3 "$THUMB" &>/dev/null
 echo "Generated thumbnail"
