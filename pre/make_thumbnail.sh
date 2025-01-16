@@ -12,7 +12,7 @@ if [ ! -f "$FILE" ]; then
 fi
 
 FILETYPE="$(file --mime-type -b $FILE)"
-if [ "$FILETYPE" != "video/*" ]; then
+if [[ "$FILETYPE" != "video/"* ]]; then
 	echo "$FILE is not a video."
 	exit 1
 fi
