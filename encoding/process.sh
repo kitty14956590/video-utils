@@ -52,4 +52,5 @@ process mpeg1video mp4
 process mpeg2video mp4
 
 CODECS_JSON=$(printf "%s\n" "${CODECS[@]}" | jq -R . | jq -c -s .)
-echo "{\"codec\":${CODECS_JSON},\"chrome\":\"h265\",\"firefox\":\"h264\"}"
+echo "{\"codec\":${CODECS_JSON},\"chrome\":\"h265\",\"firefox\":\"h264\"}" > "${STRIPPED}.json"
+echo "Success"
